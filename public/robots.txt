@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin-approval
+Disallow: /api/
 
 Sitemap: https://copycloud.me/sitemap.xml
