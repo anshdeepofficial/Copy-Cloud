@@ -46,6 +46,12 @@ export default function ExperienceRouter() {
     } else {
       delete document.documentElement.dataset.ccTheme;
     }
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (themeMeta) {
+      themeMeta.content = uiMode === "glass"
+        ? (resolvedTheme === "dark" ? "#0c0f14" : "#edf1f5")
+        : uiMode === "classic" ? "#030307" : "#edf1f5";
+    }
     return () => document.body.classList.remove("cc-glass-mode");
   }, [uiMode, resolvedTheme]);
 
