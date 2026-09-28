@@ -1,7 +1,7 @@
-// Copy Cloud Service Worker – v5
+// Copy Cloud Service Worker – v6
 // Provides offline shell caching and network-first strategy for pages.
 
-const CACHE_NAME = 'copycloud-v5';
+const CACHE_NAME = 'copycloud-v6';
 
 // Core shell assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -15,7 +15,7 @@ const PRECACHE_ASSETS = [
   '/logo.png?v=4',
   '/web-app-manifest-192x192.png?v=5',
   '/web-app-manifest-512x512.png?v=5',
-  '/site.webmanifest?v=5'
+  '/site.webmanifest?v=5',\n  '/glass-pages.css',\n  '/glass-pages.js'
 ];
 
 // Install – cache the app shell
