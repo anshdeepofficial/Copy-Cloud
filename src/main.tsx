@@ -3,7 +3,7 @@ injectSpeedInsights();
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
-import App from "./app/App.tsx";
+import ExperienceRouter from "./app/ExperienceRouter.tsx";
 import AdminPage from "./app/pages/AdminPage.tsx";
 import "./styles/index.css";
 
@@ -19,9 +19,7 @@ const CANONICAL_PATH_OVERRIDES: Record<string, string> = {
 };
 
 function removeTrailingSlash(pathname: string): string {
-  if (pathname === "/") {
-    return pathname;
-  }
+  if (pathname === "/") return pathname;
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
@@ -33,11 +31,8 @@ function getCanonicalPath(pathname: string): string {
 function CanonicalUpdater() {
   const location = useLocation();
   useEffect(() => {
-    // Updates the existing <link rel="canonical"> in index.html on each route change.
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (canonical) {
-      canonical.href = `${BASE_URL}${getCanonicalPath(location.pathname)}`;
-    }
+    if (canonical) canonical.href = BASE_URL + getCanonicalPath(location.pathname);
   }, [location.pathname]);
   return null;
 }
@@ -46,7 +41,7 @@ createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <CanonicalUpdater />
     <Routes>
-      <Route path="/" element={<App />} />
+      <Route path="/" element={<ExperienceRouter />} />
       <Route path="/admin-approval" element={<AdminPage />} />
     </Routes>
   </BrowserRouter>
