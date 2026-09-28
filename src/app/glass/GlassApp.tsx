@@ -38,6 +38,10 @@ export function GlassApp({
       setPrefill(clean);
       setTab("retrieve");
     }
+    params.delete("code");
+    params.delete("retrieve");
+    const nextUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : "") + window.location.hash;
+    window.history.replaceState({}, "", nextUrl);
   }, []);
 
   const openHistoryCode = (code: string) => {
