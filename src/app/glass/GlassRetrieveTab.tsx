@@ -1,121 +1,247 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import JSZip from "jszip";
-import { Copy, Download, ExternalLink, FileArchive, FileText, Image as ImageIcon, Video } from "lucide-react";
+import { Archive, ArrowLeft, Copy, Download, ExternalLink, Eye, FileText, FileUp, Film, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { addToHistory, fileKind, supabase } from "../../lib/supabase";
 
-type Retrieved = { type: "text" | "file"; content: string };
-type RetrievedFile = { name: string; url: string };
+type Stage = "input" | "loading" | "result";
+type ClipData = { code: string; content: string; type: "text" | "file" };
+type FileEntry = { name: string; url: string };
+
+function parseHttpUrl(value: string): string | null {
+  const raw = value.trim();
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? raw : null;
+  } catch {
+    return null;
+  }
+}
 
 export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
-  const [code, setCode] = useState(prefillCode || "");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Retrieved | null>(null);
-  const [files, setFiles] = useState<RetrievedFile[]>([]);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [stage, setStage] = useState<Stage>("input");
+  const [result, setResult] = useState<ClipData | null>(null);
+  const [files, setFiles] = useState<FileEntry[]>([]);
+  const [copied, setCopied] = useState(false);
   const [zipping, setZipping] = useState(false);
+  const [preview, setPreview] = useState<FileEntry | null>(null);
+  const refs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (prefillCode) setCode(prefillCode);
+    if (prefillCode?.length === 6) {
+      const clean = prefillCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      setCode(clean.split(""));
+      const timer = window.setTimeout(() => void doRetrieve(clean), 350);
+      return () => window.clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillCode]);
 
-  useEffect(() => {
-    if (prefillCode?.length === 6) void retrieve(prefillCode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefillCode]);
+  const handleKeyInput = (index: number, value: string) => {
+    const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!clean) {
+      const next = [...code];
+      next[index] = "";
+      setCode(next);
+      return;
+    }
+    if (clean.length > 1) {
+      const next = [...code];
+      for (let offset = 0; offset < clean.length && index + offset < 6; offset += 1) next[index + offset] = clean[offset];
+      setCode(next);
+      refs.current[Math.min(index + clean.length, 5)]?.focus();
+      return;
+    }
+    const next = [...code];
+    next[index] = clean;
+    setCode(next);
+    if (index < 5) refs.current[index + 1]?.focus();
+  };
 
-  const retrieve = async (forcedCode?: string) => {
-    const clean = (forcedCode || code).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-    if (clean.length !== 6) return toast.error("Enter the full 6-character code.");
-    setLoading(true);
-    setResult(null);
+  const codeStr = code.join("");
+  const complete = codeStr.length === 6;
+
+  const doRetrieve = async (override?: string) => {
+    const clean = (override || codeStr).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    if (clean.length !== 6) return toast.error("Enter a valid 6-character code.");
+    setStage("loading");
     setFiles([]);
+    setResult(null);
     try {
-      const { data, error } = await supabase.from("clips").select("content,type,created_at").eq("code", clean).maybeSingle();
-      if (error) throw error;
-      if (!data) return toast.error("Code not found or already expired.");
-      const createdAt = new Date(data.created_at).getTime();
-      if (Number.isFinite(createdAt) && Date.now() - createdAt > 24 * 60 * 60 * 1000) return toast.error("This transfer has expired.");
-      const typed: Retrieved = { type: data.type, content: data.content };
-      setResult(typed);
-      if (typed.type === "file") {
-        const paths: string[] = JSON.parse(typed.content);
+      const { data, error } = await supabase.from("clips").select("*").eq("code", clean).single();
+      if (error || !data) {
+        toast.error("Code not found or expired.");
+        setStage("input");
+        return;
+      }
+      if (data.type === "file") {
+        const paths: string[] = JSON.parse(data.content);
         setFiles(paths.map((path) => {
           const name = path.split("-").slice(2).join("-") || path;
           const { data: publicData } = supabase.storage.from("uploads").getPublicUrl(path);
           return { name, url: publicData.publicUrl };
         }));
       }
-      addToHistory({ code: clean, action: "retrieve", contentType: typed.type, preview: typed.type === "text" ? typed.content.slice(0, 40) : "Retrieved files", ts: Date.now() });
-      setCode(clean);
-    } catch (error: any) {
-      toast.error(error?.message || "Could not retrieve this transfer.");
-    } finally {
-      setLoading(false);
+      setResult({ code: data.code, content: data.content, type: data.type });
+      setStage("result");
+      addToHistory({
+        code: clean,
+        action: "retrieve",
+        contentType: data.type,
+        preview: data.type === "text" ? data.content.slice(0, 40) : `${JSON.parse(data.content).length} file(s)`,
+        ts: Date.now(),
+      });
+      toast.success("Content found!");
+    } catch {
+      toast.error("Something went wrong.");
+      setStage("input");
     }
   };
 
-  const downloadZip = async () => {
+  const reset = () => {
+    setStage("input");
+    setCode(["", "", "", "", "", ""]);
+    setResult(null);
+    setFiles([]);
+    setPreview(null);
+    window.setTimeout(() => refs.current[0]?.focus(), 100);
+  };
+
+  const handleCopy = async () => {
+    if (!result) return;
+    await navigator.clipboard.writeText(result.content);
+    setCopied(true);
+    toast.success("Copied!");
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleZip = async () => {
     setZipping(true);
     try {
       const zip = new JSZip();
-      for (const file of files) {
+      await Promise.all(files.map(async (file) => {
         const response = await fetch(file.url);
-        if (!response.ok) throw new Error(`Could not fetch ${file.name}`);
+        if (!response.ok) throw new Error(`Could not download ${file.name}`);
         zip.file(file.name, await response.blob());
-      }
+      }));
       const blob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `copycloud-${code}.zip`;
+      anchor.download = `copycloud-${result?.code}.zip`;
       anchor.click();
       URL.revokeObjectURL(url);
-    } catch (error: any) {
-      toast.error(error?.message || "ZIP download failed.");
+      toast.success("Downloaded!");
+    } catch {
+      toast.error("ZIP failed.");
     } finally {
       setZipping(false);
     }
   };
 
-  const maybeUrl = result?.type === "text" && /^https?:\/\/\S+$/i.test(result.content.trim()) ? result.content.trim() : null;
+  const resolvedLink = useMemo(() => (result?.type === "text" ? parseHttpUrl(result.content) : null), [result]);
+
+  if (stage !== "result") {
+    return (
+      <div className="cc-glass-panel cc-classic-content-panel cc-classic-retrieve">
+        <p className="cc-classic-section-label">ENTER PORTAL CODE</p>
+        <div className="cc-otp-row">
+          {code.map((char, index) => (
+            <input
+              key={index}
+              ref={(element) => { refs.current[index] = element; }}
+              type="text"
+              maxLength={6}
+              value={char}
+              onChange={(event) => handleKeyInput(index, event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Backspace" && !code[index] && index > 0) refs.current[index - 1]?.focus();
+                if (event.key === "Enter") void doRetrieve();
+              }}
+              onFocus={(event) => event.currentTarget.select()}
+              className={char ? "filled" : ""}
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              inputMode="text"
+              aria-label={`Code character ${index + 1}`}
+            />
+          ))}
+        </div>
+        <button className="cc-primary-button cc-classic-submit" onClick={() => void doRetrieve()} disabled={!complete || stage === "loading"}>
+          {stage === "loading" ? <><span className="cc-spinner" /> Scanning Cloud…</> : <><Search size={18} /> Find Content</>}
+        </button>
+        <div className="cc-classic-retrieve-hint">Enter the 6-character code shown on the sending device</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="cc-glass-panel">
-      <div className="cc-retrieve-head"><span className="cc-kicker">ENTER YOUR CODE</span><h2>Open a transfer</h2><p>Type the six characters exactly as shown on the sending device.</p></div>
-      <div className="cc-code-input-wrap">
-        <input value={code} onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))} onKeyDown={(event) => { if (event.key === "Enter") void retrieve(); }} maxLength={6} autoCapitalize="characters" spellCheck={false} placeholder="A3K9Z7" />
-        <button className="cc-primary-button" onClick={() => void retrieve()} disabled={loading || code.length !== 6}>{loading ? "Checking…" : "Retrieve"}</button>
+    <div className="cc-glass-panel cc-classic-content-panel cc-classic-retrieve-result">
+      <div className="cc-classic-result-head">
+        <div>
+          <div className="cc-classic-result-title"><strong>Content Found</strong><span>{result?.type}</span></div>
+          <p>Code: <b>{result?.code}</b></p>
+        </div>
+        <button onClick={reset}><ArrowLeft size={13} /> Back</button>
       </div>
 
       {result?.type === "text" && (
-        <div className="cc-result-card">
-          <div className="cc-result-head"><span><FileText size={16} /> Text received</span><button onClick={async () => { await navigator.clipboard.writeText(result.content); toast.success("Copied"); }}><Copy size={14} /> Copy</button></div>
-          <pre>{result.content}</pre>
-          {maybeUrl && <a className="cc-inline-link" href={maybeUrl} target="_blank" rel="noreferrer"><ExternalLink size={14} /> Open link</a>}
-        </div>
+        <>
+          <div className="cc-classic-text-result">
+            <div><FileText size={13} /><span>{result.content.length.toLocaleString()} chars</span></div>
+            <pre>{result.content}</pre>
+          </div>
+          <div className="cc-classic-result-actions">
+            <button className="cc-primary-button" onClick={() => void handleCopy()}><Copy size={16} /> {copied ? "Copied!" : "Copy All Text"}</button>
+            {resolvedLink && <a href={resolvedLink} target="_blank" rel="noopener noreferrer"><ExternalLink size={15} /> Open Link</a>}
+          </div>
+        </>
       )}
 
       {result?.type === "file" && (
-        <div className="cc-result-card">
-          <div className="cc-result-head"><span><Download size={16} /> {files.length} file{files.length === 1 ? "" : "s"} received</span>{files.length > 1 && <button onClick={downloadZip} disabled={zipping}><FileArchive size={14} /> {zipping ? "Building ZIP…" : "ZIP all"}</button>}</div>
-          <div className="cc-retrieved-files">
-            {files.map((file) => <RetrievedFileCard key={file.url} file={file} />)}
+        <>
+          <div className="cc-classic-retrieved-list">
+            {files.map((file) => {
+              const kind = fileKind(file.name);
+              const isImage = kind === "image";
+              const isVideo = kind === "video";
+              const canPreview = isImage || isVideo;
+              return (
+                <div className="cc-classic-retrieved-file" key={file.url}>
+                  <div className="cc-classic-retrieved-row">
+                    <div className="cc-classic-retrieved-icon">
+                      {isImage ? <img src={file.url} alt="" loading="lazy" /> : isVideo ? <Film size={16} /> : <FileUp size={16} />}
+                    </div>
+                    <span>{file.name}</span>
+                    {canPreview && <button onClick={() => setPreview(file)}><Eye size={12} /> View</button>}
+                    <a href={file.url} target="_blank" rel="noreferrer" download={file.name}><Download size={12} /> Get</a>
+                  </div>
+                  {isImage && <img className="cc-classic-inline-media" src={file.url} alt={file.name} onClick={() => setPreview(file)} loading="lazy" />}
+                  {isVideo && <video className="cc-classic-inline-media" src={file.url} controls preload="metadata" />}
+                </div>
+              );
+            })}
+          </div>
+          {files.length > 1 && (
+            <button className="cc-primary-button cc-classic-submit" onClick={() => void handleZip()} disabled={zipping}>
+              {zipping ? <><span className="cc-spinner" /> Building ZIP…</> : <><Archive size={16} /> Download All as ZIP</>}
+            </button>
+          )}
+        </>
+      )}
+
+      {preview && (
+        <div className="cc-glass-lightbox" onClick={() => setPreview(null)}>
+          <button className="cc-glass-lightbox-close" onClick={() => setPreview(null)}><X size={18} /></button>
+          <div onClick={(event) => event.stopPropagation()}>
+            {fileKind(preview.name) === "image" ? <img src={preview.url} alt={preview.name} /> : <video src={preview.url} controls autoPlay />}
+            <div className="cc-glass-lightbox-meta"><span>{preview.name}</span><a href={preview.url} download={preview.name}><Download size={12} /> Download</a></div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function RetrievedFileCard({ file }: { file: RetrievedFile }) {
-  const kind = fileKind(file.name);
-  return (
-    <div className="cc-retrieved-file">
-      <div className="cc-file-icon">{kind === "image" ? <ImageIcon size={19} /> : kind === "video" ? <Video size={19} /> : <FileText size={19} />}</div>
-      <div className="cc-file-copy"><strong>{file.name}</strong><span>{kind === "image" ? "Image" : kind === "video" ? "Video" : "File"}</span></div>
-      <a href={file.url} target="_blank" rel="noreferrer" download={file.name}><Download size={15} /> Get</a>
-      {kind === "image" && <img className="cc-inline-preview" src={file.url} alt={file.name} loading="lazy" />}
-      {kind === "video" && <video className="cc-inline-preview" src={file.url} controls preload="metadata" />}
     </div>
   );
 }
