@@ -15,6 +15,7 @@ import {
   DevicesOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
+  ExpandMoreRounded,
   HistoryRounded,
   InboxOutlined,
   InfoOutlined,
@@ -65,6 +66,7 @@ export const GlassUploadIcon = wrap(FileUploadOutlined);
 export const GlassSearchIcon = wrap(SearchRounded);
 export const GlassBackIcon = wrap(ArrowBackRounded);
 export const GlassExternalIcon = wrap(OpenInNewRounded);
+export const GlassChevronIcon = wrap(ExpandMoreRounded);
 export const GlassEyeIcon = wrap(VisibilityOutlined);
 export const GlassArchiveIcon = wrap(ArchiveOutlined);
 export const GlassVideoIcon = wrap(VideocamOutlined);
