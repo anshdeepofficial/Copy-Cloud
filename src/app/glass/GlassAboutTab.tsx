@@ -24,10 +24,10 @@ const faq = [
 ];
 
 const links = [
-  { kind: "glass", icon: GlassWorkIcon, label: "Portfolio", href: "https://anshdeepofficial.vercel.app/" },
-  { kind: "brand", icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/itsanshdeepofficial/" },
-  { kind: "brand", icon: Instagram, label: "Instagram", href: "https://www.instagram.com/anshdeep_officiall/" },
-  { kind: "brand", icon: Github, label: "GitHub", href: "https://github.com/anshdeepofficial/" },
+  { kind: "glass", icon: GlassWorkIcon, label: "Portfolio", href: "https://anshdeepofficial1.vercel.app/" },
+  { kind: "brand", icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/anshdeepofficial1/" },
+  { kind: "brand", icon: Instagram, label: "Instagram", href: "https://www.instagram.com/anshdeepofficial1/" },
+  { kind: "brand", icon: Github, label: "GitHub", href: "https://github.com/anshdeepofficial1" },
 ] as const;
 
 export function GlassAboutTab() {
