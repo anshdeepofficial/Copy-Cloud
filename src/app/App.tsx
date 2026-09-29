@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
-import { Send, Download, Clock, Info, Zap, Shield, Timer, Lock, Radio, Wifi, Cpu, Globe, Key } from "lucide-react";
+import { Send, Download, Clock, Info, Zap, Shield, Timer, Lock, Radio, Wifi, Cpu, Globe, Key, Sparkles } from "lucide-react";
 import { PremiumBackground } from "./components/PremiumBackground";
 import { WorkspaceCard } from "./components/WorkspaceCard";
 import { SendTab } from "./components/SendTab";
@@ -51,7 +51,7 @@ const HERO: Record<Tab, { eyebrow: string; title: string; sub: string }> = {
   },
 };
 
-export default function App() {
+export default function App({ onSwitchToGlass }: { onSwitchToGlass?: () => void }) {
   const [tab, setTab] = useState<Tab>("send");
   const [prefill, setPrefill] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnStatus>("checking");
@@ -198,6 +198,38 @@ export default function App() {
             <Timer size={11} color="#6366f1" />
             <span style={{ color: "#6366f1", fontSize: "0.7rem", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>24H WIPE</span>
           </div>
+          {onSwitchToGlass && (
+            <button
+              type="button"
+              onClick={onSwitchToGlass}
+              title="Switch to Glass UI"
+              aria-label="Switch to Glass UI"
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: "50%",
+                display: "grid",
+                placeItems: "center",
+                flexShrink: 0,
+                cursor: "pointer",
+                color: "#a5b4fc",
+                background: "rgba(99,102,241,0.10)",
+                border: "1px solid rgba(99,102,241,0.24)",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.22)",
+                transition: "background 0.18s, border-color 0.18s, transform 0.18s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(99,102,241,0.18)";
+                e.currentTarget.style.borderColor = "rgba(99,102,241,0.38)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(99,102,241,0.10)";
+                e.currentTarget.style.borderColor = "rgba(99,102,241,0.24)";
+              }}
+            >
+              <Sparkles size={15} />
+            </button>
+          )}
         </div>
       </header>
 

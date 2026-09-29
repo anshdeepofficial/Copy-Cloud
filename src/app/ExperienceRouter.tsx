@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Monitor, Moon, Sparkles, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import ClassicApp from "./App";
 import { GlassApp } from "./glass/GlassApp";
 import "../styles/glass.css";
@@ -80,15 +80,7 @@ export default function ExperienceRouter() {
     );
   }
 
-  return (
-    <div className="cc-classic-shell">
-      <ClassicApp />
-      <button className="cc-classic-switch" onClick={() => selectUi("glass")} aria-label="Switch to the new Glass interface">
-        <Sparkles size={15} />
-        Try Glass UI
-      </button>
-    </div>
-  );
+  return <ClassicApp onSwitchToGlass={() => selectUi("glass")} />;
 }
 
 function FirstVisitChooser({ onChoose }: { onChoose: (mode: UiMode) => void }) {
