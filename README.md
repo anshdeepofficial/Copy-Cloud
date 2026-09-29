@@ -173,9 +173,9 @@ Please open an issue first for large changes so we can discuss them together.
 
 **Anshdeep Singh**
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-4f46e5?style=flat-square&logo=globe&logoColor=white)](https://anshdeepsingh.dev/)
-[![Instagram](https://img.shields.io/badge/Instagram-Follow-e1306c?style=flat-square&logo=instagram&logoColor=white)](https://instagram.com/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-4f46e5?style=flat-square&logo=globe&logoColor=white)](https://anshdeepofficial1.vercel.app/)
+[![Instagram](https://img.shields.io/badge/Instagram-Follow-e1306c?style=flat-square&logo=instagram&logoColor=white)](https://www.instagram.com/anshdeepofficial1/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/anshdeepofficial1/)
 
 ---
 
@@ -220,7 +220,7 @@ Copy-Cloud/
 
 ```bash
 # 1. Clone
-git clone https://github.com/Ansh200618/Copy-Cloud.git
+git clone https://github.com/anshdeepofficial1/Copy-Cloud.git
 cd Copy-Cloud
 
 # 2. Install dependencies
@@ -252,7 +252,7 @@ Create a Supabase Storage bucket named **`clipboard-files`** and configure Row L
 
 ### Deployment
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Ansh200618/Copy-Cloud)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/anshdeepofficial1/Copy-Cloud)
 
 Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables in your Vercel project settings. The `vercel.json` file handles all routing rules automatically.
 
@@ -278,6 +278,6 @@ Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables in
 
 ⭐ **If you find Copy Cloud useful, please give it a star!** ⭐
 
-Made with ❤️ by [Anshdeep Singh](https://github.com/Ansh200618)
+Made with ❤️ by [Anshdeep Singh](https://github.com/anshdeepofficial1)
 
 </div>
