@@ -15,10 +15,10 @@ const faq = [
 ];
 
 const links = [
-  { icon: Briefcase, label: "Portfolio", href: "https://anshdeepofficial.vercel.app/" },
-  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/itsanshdeepofficial/" },
-  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/anshdeep_officiall/" },
-  { icon: Github, label: "GitHub", href: "https://github.com/anshdeepofficial/" },
+  { icon: Briefcase, label: "Portfolio", href: "https://anshdeepofficial1.vercel.app/" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/anshdeepofficial1/" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/anshdeepofficial1/" },
+  { icon: Github, label: "GitHub", href: "https://github.com/anshdeepofficial1" },
 ];
 
 function FAQ({ q, a }: { q: string; a: string }) {
