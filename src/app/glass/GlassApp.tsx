@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, Clock, Download, Info, Monitor, Moon, RotateCcw, Send, Shield, Sun, Timer, Zap } from "lucide-react";
 import { Toaster } from "sonner";
 import { Chatbot } from "../components/Chatbot";
 import { supabase } from "../../lib/supabase";
@@ -8,9 +7,25 @@ import { GlassSendTab } from "./GlassSendTab";
 import { GlassRetrieveTab } from "./GlassRetrieveTab";
 import { GlassHistoryTab } from "./GlassHistoryTab";
 import { GlassAboutTab } from "./GlassAboutTab";
+import {
+  GlassCheckIcon,
+  GlassDarkIcon,
+  GlassDevicesIcon,
+  GlassHistoryIcon,
+  GlassInfoIcon,
+  GlassLightIcon,
+  GlassRetrieveIcon,
+  GlassSendIcon,
+  GlassShieldIcon,
+  GlassSwitchIcon,
+  GlassSystemIcon,
+  GlassTimerIcon,
+  type GlassIconProps,
+} from "./GlassIcons";
 import type { GlassTheme, Tab } from "./types";
 
 type ConnStatus = "checking" | "online" | "degraded" | "offline";
+type IconComponent = (props: GlassIconProps) => JSX.Element;
 
 const STATUS_META: Record<ConnStatus, { label: string; color: string; bg: string; border: string }> = {
   checking: { label: "CHECKING", color: "#eab308", bg: "rgba(234,179,8,0.10)", border: "rgba(234,179,8,0.25)" },
@@ -19,11 +34,11 @@ const STATUS_META: Record<ConnStatus, { label: string; color: string; bg: string
   offline: { label: "OFFLINE", color: "#ef4444", bg: "rgba(239,68,68,0.10)", border: "rgba(239,68,68,0.25)" },
 };
 
-const tabs: { id: Tab; label: string; icon: typeof Send }[] = [
-  { id: "send", label: "Send", icon: Send },
-  { id: "retrieve", label: "Retrieve", icon: Download },
-  { id: "history", label: "History", icon: Clock },
-  { id: "about", label: "About", icon: Info },
+const tabs: { id: Tab; label: string; icon: IconComponent }[] = [
+  { id: "send", label: "Send", icon: GlassSendIcon },
+  { id: "retrieve", label: "Retrieve", icon: GlassRetrieveIcon },
+  { id: "history", label: "History", icon: GlassHistoryIcon },
+  { id: "about", label: "About", icon: GlassInfoIcon },
 ];
 
 const HERO: Record<Tab, { eyebrow: string; title: string; sub: string }> = {
@@ -133,13 +148,13 @@ export function GlassApp({
           <span>Copy<span>Cloud</span></span>
         </button>
 
-        <nav className="cc-classiclike-top-tabs" aria-label="CopyCloud sections">
+        <nav className="cc-classiclike-top-tabs cc-iconly-tabs" aria-label="CopyCloud sections">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = tab === item.id;
             return (
               <button key={item.id} className={active ? "active" : ""} onClick={() => handleTabChange(item.id)}>
-                <Icon size={13} />
+                <span className="cc-nav-icon"><Icon size={18} /></span>
                 {item.label}
               </button>
             );
@@ -155,19 +170,19 @@ export function GlassApp({
             <i style={{ background: statusMeta.color, boxShadow: `0 0 7px ${statusMeta.color}` }} />
             {statusMeta.label}
           </span>
-          <span className="cc-wipe-pill"><Timer size={11} />24H WIPE</span>
+          <span className="cc-wipe-pill"><GlassTimerIcon size={14} />24H WIPE</span>
           <div className="cc-settings-wrap">
-            <button className="cc-round-button" onClick={() => setSettingsOpen((value) => !value)} aria-expanded={settingsOpen} aria-label="Appearance settings">
-              {resolvedTheme === "dark" ? <Moon size={16} /> : <Sun size={16} />}
+            <button className="cc-round-button cc-iconly-round" onClick={() => setSettingsOpen((value) => !value)} aria-expanded={settingsOpen} aria-label="Appearance settings">
+              {resolvedTheme === "dark" ? <GlassDarkIcon size={20} /> : <GlassLightIcon size={20} />}
             </button>
             {settingsOpen && (
               <div className="cc-settings-popover">
                 <span className="cc-popover-title">Appearance</span>
-                <ThemeChoice icon={Monitor} label="System" active={theme === "system"} onClick={() => onThemeChange("system")} />
-                <ThemeChoice icon={Sun} label="Light" active={theme === "light"} onClick={() => onThemeChange("light")} />
-                <ThemeChoice icon={Moon} label="Dark" active={theme === "dark"} onClick={() => onThemeChange("dark")} />
+                <ThemeChoice icon={GlassSystemIcon} label="System" active={theme === "system"} onClick={() => onThemeChange("system")} />
+                <ThemeChoice icon={GlassLightIcon} label="Light" active={theme === "light"} onClick={() => onThemeChange("light")} />
+                <ThemeChoice icon={GlassDarkIcon} label="Dark" active={theme === "dark"} onClick={() => onThemeChange("dark")} />
                 <div className="cc-popover-divider" />
-                <button className="cc-popover-row" onClick={onSwitchToClassic}><RotateCcw size={15} /><span>Use Classic theme</span></button>
+                <button className="cc-popover-row" onClick={onSwitchToClassic}><GlassSwitchIcon size={17} /><span>Use Classic theme</span></button>
               </div>
             )}
           </div>
@@ -188,9 +203,9 @@ export function GlassApp({
               <h1>{hero.title}</h1>
               <p>{hero.sub}</p>
               <div className="cc-classiclike-trust">
-                <span><Shield size={11} /> Anonymous</span>
-                <span><Timer size={11} /> Wipe-on-24</span>
-                <span><Zap size={11} /> Cross-platform</span>
+                <span><GlassShieldIcon size={14} /> Anonymous</span>
+                <span><GlassTimerIcon size={14} /> Wipe-on-24</span>
+                <span><GlassDevicesIcon size={14} /> Cross-platform</span>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -198,13 +213,13 @@ export function GlassApp({
 
         <section className="cc-classiclike-workspace-wrap">
           <div className="cc-classiclike-workspace">
-            <div className="cc-workspace-tabs cc-workspace-tabs-classic">
+            <div className="cc-workspace-tabs cc-workspace-tabs-classic cc-iconly-tabs">
               {tabs.map((item) => {
                 const Icon = item.icon;
                 const active = tab === item.id;
                 return (
                   <button key={item.id} className={active ? "active" : ""} onClick={() => handleTabChange(item.id)}>
-                    <Icon size={13} />
+                    <span className="cc-nav-icon"><Icon size={18} /></span>
                     {item.label}
                   </button>
                 );
@@ -231,12 +246,12 @@ export function GlassApp({
   );
 }
 
-function ThemeChoice({ icon: Icon, label, active, onClick }: { icon: typeof Sun; label: string; active: boolean; onClick: () => void }) {
+function ThemeChoice({ icon: Icon, label, active, onClick }: { icon: IconComponent; label: string; active: boolean; onClick: () => void }) {
   return (
     <button className={`cc-popover-row ${active ? "active" : ""}`} onClick={onClick}>
-      <Icon size={15} />
+      <Icon size={17} />
       <span>{label}</span>
-      {active && <Check size={14} />}
+      {active && <GlassCheckIcon size={16} />}
     </button>
   );
 }
@@ -244,6 +259,8 @@ function ThemeChoice({ icon: Icon, label, active, onClick }: { icon: typeof Sun;
 function GlassBackground() {
   return (
     <div className="cc-classiclike-background" aria-hidden>
+      <div className="cc-theme-aurora cc-theme-aurora-a" />
+      <div className="cc-theme-aurora cc-theme-aurora-b" />
       <div className="cc-light-grid cc-light-grid-top" />
       <div className="cc-light-grid cc-light-grid-floor" />
       <div className="cc-light-orb cc-light-orb-a" />

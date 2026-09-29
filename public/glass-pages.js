@@ -5,8 +5,7 @@
   const media = window.matchMedia("(prefers-color-scheme: dark)");
 
   function savedUi() {
-    const value = localStorage.getItem(UI_KEY);
-    return value === "classic" || value === "glass" ? value : null;
+    return localStorage.getItem(UI_KEY) === "glass" ? "glass" : "classic";
   }
   function savedTheme() {
     const value = localStorage.getItem(THEME_KEY);
@@ -25,7 +24,6 @@
   function setUi(value) {
     localStorage.setItem(UI_KEY, value);
     apply();
-    document.querySelector(".cc-static-choice")?.remove();
     renderControls();
   }
   function cycleTheme() {
@@ -50,22 +48,12 @@
     themeButton.addEventListener("click", () => ui === "glass" ? cycleTheme() : setUi("glass"));
     document.body.appendChild(controls);
   }
-  function renderChoice() {
-    if (savedUi() || !document.body) return;
-    const overlay = document.createElement("div");
-    overlay.className = "cc-static-choice";
-    overlay.innerHTML = '<div class="cc-static-choice-card" role="dialog" aria-modal="true" aria-label="Choose CopyCloud interface"><div class="cc-static-choice-brand"><img src="/logo.png" alt=""><span>CopyCloud</span></div><h2>Choose your CopyCloud experience</h2><p>Use the original interface or the new frosted Glass experience. You can switch anytime.</p><div class="cc-static-choice-grid"><button type="button" data-choice="classic"><strong>Classic</strong><span>Original CopyCloud interface</span></button><button type="button" data-choice="glass"><strong>Glass</strong><span>New light, dark and system-aware design</span></button></div></div>';
-    overlay.querySelectorAll("[data-choice]").forEach((button) => {
-      button.addEventListener("click", () => setUi(button.dataset.choice));
-    });
-    document.body.appendChild(overlay);
-  }
 
   apply();
   media.addEventListener?.("change", () => { if (savedTheme() === "system") apply(); });
-  window.addEventListener("storage", apply);
-  document.addEventListener("DOMContentLoaded", () => {
-    renderChoice();
-    if (savedUi()) renderControls();
+  window.addEventListener("storage", () => {
+    apply();
+    renderControls();
   });
+  document.addEventListener("DOMContentLoaded", renderControls);
 })();

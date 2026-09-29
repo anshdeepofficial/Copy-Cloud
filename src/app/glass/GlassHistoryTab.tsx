@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import { Clock, Download, Inbox, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { clearHistoryStore, getHistory, type HistoryItem } from "../../lib/supabase";
+import {
+  GlassClockIcon,
+  GlassInboxIcon,
+  GlassRetrieveIcon,
+  GlassSendIcon,
+  GlassTrashIcon,
+} from "./GlassIcons";
 
 function timeAgo(ts: number) {
   const seconds = Math.max(0, Math.floor((Date.now() - ts) / 1000));
@@ -26,7 +32,7 @@ export function GlassHistoryTab({ onRetrieve }: { onRetrieve: (code: string) => 
     return (
       <div className="cc-glass-panel cc-classic-content-panel">
         <div className="cc-classic-empty-history">
-          <div><Inbox size={22} /></div>
+          <div><GlassInboxIcon size={24} /></div>
           <strong>No activity yet</strong>
           <p>Your recent sends and retrievals will appear here.</p>
         </div>
@@ -38,19 +44,19 @@ export function GlassHistoryTab({ onRetrieve }: { onRetrieve: (code: string) => 
     <div className="cc-glass-panel cc-classic-content-panel">
       <div className="cc-classic-history-head">
         <p>RECENT — {history.length} ENTRIES</p>
-        <button onClick={clear}><Trash2 size={12} /> Clear</button>
+        <button onClick={clear}><GlassTrashIcon size={15} /> Clear</button>
       </div>
       <div className="cc-classic-history-list">
         {history.map((item, index) => (
           <button key={`${item.code}-${index}`} onClick={() => onRetrieve(item.code)}>
             <span className={`cc-classic-history-icon ${item.action}`}>
-              {item.action === "send" ? <Send size={14} /> : <Download size={14} />}
+              {item.action === "send" ? <GlassSendIcon size={17} /> : <GlassRetrieveIcon size={17} />}
             </span>
             <span className="cc-classic-history-main">
               <span><b>{item.code}</b><em>{item.action}</em></span>
               <small>{item.preview}</small>
             </span>
-            <span className="cc-classic-history-time"><Clock size={11} /> {timeAgo(item.ts)}</span>
+            <span className="cc-classic-history-time"><GlassClockIcon size={14} /> {timeAgo(item.ts)}</span>
           </button>
         ))}
       </div>

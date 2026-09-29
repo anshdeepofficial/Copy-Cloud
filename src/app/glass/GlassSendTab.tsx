@@ -1,8 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
-import { CheckCircle2, Clipboard, Copy, FileText, FolderUp, RotateCcw, Trash2, Upload, Video, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { addToHistory, formatFileSize, generateCode, supabase } from "../../lib/supabase";
+import {
+  GlassBoltIcon,
+  GlassCheckIcon,
+  GlassCloseIcon,
+  GlassCopyIcon,
+  GlassFilesIcon,
+  GlassPasteIcon,
+  GlassRefreshIcon,
+  GlassTextIcon,
+  GlassTrashIcon,
+  GlassUploadIcon,
+  GlassVideoIcon,
+} from "./GlassIcons";
 
 type SendType = "text" | "file";
 const MAX_BYTES = 40 * 1024 * 1024;
@@ -71,14 +83,14 @@ export function GlassSendTab() {
     const shareUrl = `${window.location.origin}/?code=${success.code}`;
     return (
       <div className="cc-glass-panel cc-success-panel cc-classic-content-panel">
-        <div className="cc-success-icon"><CheckCircle2 size={26} /></div>
+        <div className="cc-success-icon"><GlassCheckIcon size={26} /></div>
         <h2>Portal Created</h2>
         <p>Share this code — it expires in 24 hours</p>
         <div className="cc-code-row">{success.code.split("").map((char, index) => <span key={`${char}-${index}`}>{char}</span>)}</div>
         <div className="cc-qr-wrap"><QRCode value={shareUrl} size={180} bgColor="#ffffff" fgColor="#101114" level="H" /></div>
         <div className="cc-action-row">
-          <button className="cc-secondary-button" onClick={async () => { await navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }}><Copy size={15} /> Copy Link</button>
-          <button className="cc-primary-button" onClick={() => { setSuccess(null); setText(""); setFiles([]); setCompletedUploads(0); setSendType("text"); }}><RotateCcw size={15} /> New Transfer</button>
+          <button className="cc-secondary-button" onClick={async () => { await navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }}><GlassCopyIcon size={15} /> Copy Link</button>
+          <button className="cc-primary-button" onClick={() => { setSuccess(null); setText(""); setFiles([]); setCompletedUploads(0); setSendType("text"); }}><GlassRefreshIcon size={15} /> New Transfer</button>
         </div>
       </div>
     );
@@ -86,9 +98,9 @@ export function GlassSendTab() {
 
   return (
     <div className="cc-glass-panel cc-classic-content-panel">
-      <div className="cc-classic-send-toggle" role="tablist" aria-label="Send type">
-        <button className={sendType === "text" ? "active" : ""} onClick={() => setSendType("text")}><FileText size={14} /> Text / Code</button>
-        <button className={sendType === "file" ? "active" : ""} onClick={() => setSendType("file")}><FolderUp size={14} /> Files</button>
+      <div className="cc-classic-send-toggle cc-iconly-actions" role="tablist" aria-label="Send type">
+        <button className={sendType === "text" ? "active" : ""} onClick={() => setSendType("text")}><GlassTextIcon size={17} /> Text / Code</button>
+        <button className={sendType === "file" ? "active" : ""} onClick={() => setSendType("file")}><GlassFilesIcon size={17} /> Files</button>
       </div>
 
       {sendType === "text" ? (
@@ -96,8 +108,8 @@ export function GlassSendTab() {
           <div className="cc-classic-editor-toolbar">
             <span>✦ SECURE EDITOR</span>
             <div>
-              <button onClick={async () => { try { const clip = await navigator.clipboard.readText(); setText((prev) => prev + clip); } catch { toast.error("Use Ctrl+V"); } }}><Clipboard size={12} /> Paste</button>
-              <button onClick={() => setText("")} disabled={!text}><Trash2 size={12} /> Clear</button>
+              <button onClick={async () => { try { const clip = await navigator.clipboard.readText(); setText((prev) => prev + clip); } catch { toast.error("Use Ctrl+V"); } }}><GlassPasteIcon size={15} /> Paste</button>
+              <button onClick={() => setText("")} disabled={!text}><GlassTrashIcon size={15} /> Clear</button>
             </div>
           </div>
           <div className="cc-classic-editor-body">
@@ -116,7 +128,7 @@ export function GlassSendTab() {
           >
             {files.length === 0 ? (
               <div className="cc-classic-drop-empty">
-                <div className="cc-classic-drop-icon"><Upload size={22} /></div>
+                <div className="cc-classic-drop-icon"><GlassUploadIcon size={26} /></div>
                 <p>Drop files or <span>click to browse</span></p>
                 <small>Max 40 MB</small>
               </div>
@@ -138,18 +150,18 @@ export function GlassSendTab() {
       )}
 
       <button className="cc-primary-button cc-classic-submit" onClick={send} disabled={loading || (sendType === "file" ? !files.length || totalSize > MAX_BYTES : !text.trim())}>
-        {loading ? "Generating Portal…" : <><Zap size={18} /> Generate Transfer Code</>}
+        {loading ? "Generating Portal…" : <><GlassBoltIcon size={20} /> Generate Transfer Code</>}
       </button>
 
       {previewFile && (
         <div className="cc-glass-lightbox" onClick={() => setPreviewFile(null)}>
-          <button className="cc-glass-lightbox-close" onClick={() => setPreviewFile(null)}><X size={18} /></button>
+          <button className="cc-glass-lightbox-close" onClick={() => setPreviewFile(null)}><GlassCloseIcon size={20} /></button>
           <div onClick={(event) => event.stopPropagation()}>
             {previewFile.type.startsWith("image/") ? <img src={previewUrl} alt={previewFile.name} />
               : previewFile.type.startsWith("video/") ? <video src={previewUrl} controls autoPlay />
               : previewFile.type.startsWith("audio/") ? <audio src={previewUrl} controls />
               : <iframe src={previewUrl} title={previewFile.name} />}
-            <div className="cc-glass-lightbox-meta"><span>{previewFile.name}</span><a href={previewUrl} download={previewFile.name}><Upload size={12} /> Download</a></div>
+            <div className="cc-glass-lightbox-meta"><span>{previewFile.name}</span><a href={previewUrl} download={previewFile.name}><GlassUploadIcon size={15} /> Download</a></div>
           </div>
         </div>
       )}
@@ -163,11 +175,11 @@ function SelectedFile({ file, onPreview, onRemove, disabled }: { file: File; onP
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   return (
     <div className="cc-classic-selected-file" onClick={(event) => event.stopPropagation()}>
-      <div className="cc-classic-selected-thumb">{kind === "image" ? <img src={preview} alt="" /> : kind === "video" ? <video src={preview} muted /> : <FileText size={15} />}</div>
+      <div className="cc-classic-selected-thumb">{kind === "image" ? <img src={preview} alt="" /> : kind === "video" ? <video src={preview} muted /> : <GlassTextIcon size={17} />}</div>
       <span className="cc-classic-selected-name">{file.name}</span>
       <small>{formatFileSize(file.size)}</small>
-      <button onClick={onPreview} aria-label={`Preview ${file.name}`}><FileText size={13} /></button>
-      <button onClick={onRemove} disabled={disabled} aria-label={`Remove ${file.name}`}><X size={13} /></button>
+      <button onClick={onPreview} aria-label={`Preview ${file.name}`}><GlassTextIcon size={16} /></button>
+      <button onClick={onRemove} disabled={disabled} aria-label={`Remove ${file.name}`}><GlassCloseIcon size={16} /></button>
     </div>
   );
 }

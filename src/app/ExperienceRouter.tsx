@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
 import ClassicApp from "./App";
 import { GlassApp } from "./glass/GlassApp";
 import "../styles/glass.css";
@@ -10,9 +9,9 @@ type GlassTheme = "system" | "light" | "dark";
 const UI_KEY = "cc_ui_version";
 const THEME_KEY = "cc_glass_theme";
 
-function readUiMode(): UiMode | null {
+function readUiMode(): UiMode {
   const saved = localStorage.getItem(UI_KEY);
-  return saved === "classic" || saved === "glass" ? saved : null;
+  return saved === "glass" ? "glass" : "classic";
 }
 
 function readTheme(): GlassTheme {
@@ -21,7 +20,7 @@ function readTheme(): GlassTheme {
 }
 
 export default function ExperienceRouter() {
-  const [uiMode, setUiMode] = useState<UiMode | null>(() => readUiMode());
+  const [uiMode, setUiMode] = useState<UiMode>(() => readUiMode());
   const [glassTheme, setGlassTheme] = useState<GlassTheme>(() => readTheme());
   const [systemDark, setSystemDark] = useState(() => window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
 
@@ -49,8 +48,8 @@ export default function ExperienceRouter() {
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (themeMeta) {
       themeMeta.content = uiMode === "glass"
-        ? (resolvedTheme === "dark" ? "#0c0f14" : "#edf1f5")
-        : uiMode === "classic" ? "#030307" : "#edf1f5";
+        ? (resolvedTheme === "dark" ? "#07101d" : "#eef7ff")
+        : "#030307";
     }
     return () => document.body.classList.remove("cc-glass-mode");
   }, [uiMode, resolvedTheme]);
@@ -65,10 +64,6 @@ export default function ExperienceRouter() {
     setGlassTheme(next);
   };
 
-  if (!uiMode) {
-    return <FirstVisitChooser onChoose={selectUi} />;
-  }
-
   if (uiMode === "glass") {
     return (
       <GlassApp
@@ -81,55 +76,4 @@ export default function ExperienceRouter() {
   }
 
   return <ClassicApp onSwitchToGlass={() => selectUi("glass")} />;
-}
-
-function FirstVisitChooser({ onChoose }: { onChoose: (mode: UiMode) => void }) {
-  return (
-    <div className="cc-chooser-page">
-      <div className="cc-chooser-glow cc-chooser-glow-one" />
-      <div className="cc-chooser-glow cc-chooser-glow-two" />
-      <main className="cc-chooser-card" role="dialog" aria-modal="true" aria-labelledby="cc-choose-title">
-        <div className="cc-chooser-brand">
-          <img src="/logo.png" alt="" />
-          <span>CopyCloud</span>
-        </div>
-        <span className="cc-kicker">YOUR INTERFACE, YOUR CHOICE</span>
-        <h1 id="cc-choose-title">Choose your CopyCloud experience</h1>
-        <p className="cc-chooser-copy">Both interfaces use the same real transfer system. You can switch again anytime.</p>
-
-        <div className="cc-choice-grid">
-          <button className="cc-choice-card cc-choice-classic" onClick={() => onChoose("classic")}>
-            <div className="cc-choice-preview cc-choice-preview-dark">
-              <div className="cc-mini-nav"><i /><i /><i /></div>
-              <div className="cc-mini-hero" />
-              <div className="cc-mini-panel"><span /><span /><span /></div>
-            </div>
-            <div className="cc-choice-copy">
-              <div><strong>Classic</strong><small>Original CopyCloud</small></div>
-              <span className="cc-choice-arrow">→</span>
-            </div>
-          </button>
-
-          <button className="cc-choice-card cc-choice-glass" onClick={() => onChoose("glass")}>
-            <div className="cc-choice-preview cc-choice-preview-light">
-              <div className="cc-mini-glass-head" />
-              <div className="cc-mini-upload-orb">↑</div>
-              <div className="cc-mini-file-row"><span /><span /></div>
-              <div className="cc-mini-action" />
-            </div>
-            <div className="cc-choice-copy">
-              <div><strong>Glass</strong><small>New light + dark experience</small></div>
-              <span className="cc-choice-new">NEW</span>
-            </div>
-          </button>
-        </div>
-
-        <div className="cc-chooser-themes" aria-hidden="true">
-          <span><Sun size={14} /> Light</span>
-          <span><Moon size={14} /> Dark</span>
-          <span><Monitor size={14} /> System</span>
-        </div>
-      </main>
-    </div>
-  );
 }
