@@ -80,3 +80,18 @@ html.cc-static-glass nav a:hover{color:var(--ccs-blue)!important}
   .cc-static-controls{left:50%;right:auto;transform:translateX(-50%);top:10px;bottom:auto}
 }
 @media(prefers-reduced-motion:reduce){.cc-static-choice-grid button,html.cc-static-glass main a{transition:none!important}}
+
+
+/* Distinct static-page Glass atmospheres; Classic remains untouched. */
+html.cc-static-glass[data-cc-theme="light"] body{
+  background:
+    radial-gradient(circle at 12% 10%,rgba(107,181,255,.28),transparent 30%),
+    radial-gradient(circle at 88% 18%,rgba(198,229,255,.54),transparent 32%),
+    linear-gradient(155deg,#f9fcff,#edf5fc 50%,#e8f1f8)!important
+}
+html.cc-static-glass[data-cc-theme="dark"] body{
+  background:
+    radial-gradient(circle at 12% 12%,rgba(40,126,255,.20),transparent 31%),
+    radial-gradient(circle at 84% 20%,rgba(91,77,255,.15),transparent 32%),
+    linear-gradient(155deg,#05080d,#08111e 50%,#070a12)!important
+}
