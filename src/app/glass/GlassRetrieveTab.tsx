@@ -1,8 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import JSZip from "jszip";
-import { Archive, ArrowLeft, Copy, Download, ExternalLink, Eye, FileText, FileUp, Film, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { addToHistory, fileKind, supabase } from "../../lib/supabase";
+import {
+  GlassArchiveIcon,
+  GlassBackIcon,
+  GlassCloseIcon,
+  GlassCopyIcon,
+  GlassExternalIcon,
+  GlassEyeIcon,
+  GlassFileIcon,
+  GlassRetrieveIcon,
+  GlassSearchIcon,
+  GlassTextIcon,
+  GlassVideoIcon,
+} from "./GlassIcons";
 
 type Stage = "input" | "loading" | "result";
 type ClipData = { code: string; content: string; type: "text" | "file" };
@@ -171,7 +183,7 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
           ))}
         </div>
         <button className="cc-primary-button cc-classic-submit" onClick={() => void doRetrieve()} disabled={!complete || stage === "loading"}>
-          {stage === "loading" ? <><span className="cc-spinner" /> Scanning Cloud…</> : <><Search size={18} /> Find Content</>}
+          {stage === "loading" ? <><span className="cc-spinner" /> Scanning Cloud…</> : <><GlassSearchIcon size={20} /> Find Content</>}
         </button>
         <div className="cc-classic-retrieve-hint">Enter the 6-character code shown on the sending device</div>
       </div>
@@ -185,18 +197,18 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
           <div className="cc-classic-result-title"><strong>Content Found</strong><span>{result?.type}</span></div>
           <p>Code: <b>{result?.code}</b></p>
         </div>
-        <button onClick={reset}><ArrowLeft size={13} /> Back</button>
+        <button onClick={reset}><GlassBackIcon size={16} /> Back</button>
       </div>
 
       {result?.type === "text" && (
         <>
           <div className="cc-classic-text-result">
-            <div><FileText size={13} /><span>{result.content.length.toLocaleString()} chars</span></div>
+            <div><GlassTextIcon size={16} /><span>{result.content.length.toLocaleString()} chars</span></div>
             <pre>{result.content}</pre>
           </div>
           <div className="cc-classic-result-actions">
-            <button className="cc-primary-button" onClick={() => void handleCopy()}><Copy size={16} /> {copied ? "Copied!" : "Copy All Text"}</button>
-            {resolvedLink && <a href={resolvedLink} target="_blank" rel="noopener noreferrer"><ExternalLink size={15} /> Open Link</a>}
+            <button className="cc-primary-button" onClick={() => void handleCopy()}><GlassCopyIcon size={18} /> {copied ? "Copied!" : "Copy All Text"}</button>
+            {resolvedLink && <a href={resolvedLink} target="_blank" rel="noopener noreferrer"><GlassExternalIcon size={17} /> Open Link</a>}
           </div>
         </>
       )}
@@ -213,11 +225,11 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
                 <div className="cc-classic-retrieved-file" key={file.url}>
                   <div className="cc-classic-retrieved-row">
                     <div className="cc-classic-retrieved-icon">
-                      {isImage ? <img src={file.url} alt="" loading="lazy" /> : isVideo ? <Film size={16} /> : <FileUp size={16} />}
+                      {isImage ? <img src={file.url} alt="" loading="lazy" /> : isVideo ? <GlassVideoIcon size={18} /> : <GlassFileIcon size={18} />}
                     </div>
                     <span>{file.name}</span>
-                    {canPreview && <button onClick={() => setPreview(file)}><Eye size={12} /> View</button>}
-                    <a href={file.url} target="_blank" rel="noreferrer" download={file.name}><Download size={12} /> Get</a>
+                    {canPreview && <button onClick={() => setPreview(file)}><GlassEyeIcon size={15} /> View</button>}
+                    <a href={file.url} target="_blank" rel="noreferrer" download={file.name}><GlassRetrieveIcon size={15} /> Get</a>
                   </div>
                   {isImage && <img className="cc-classic-inline-media" src={file.url} alt={file.name} onClick={() => setPreview(file)} loading="lazy" />}
                   {isVideo && <video className="cc-classic-inline-media" src={file.url} controls preload="metadata" />}
@@ -227,7 +239,7 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
           </div>
           {files.length > 1 && (
             <button className="cc-primary-button cc-classic-submit" onClick={() => void handleZip()} disabled={zipping}>
-              {zipping ? <><span className="cc-spinner" /> Building ZIP…</> : <><Archive size={16} /> Download All as ZIP</>}
+              {zipping ? <><span className="cc-spinner" /> Building ZIP…</> : <><GlassArchiveIcon size={18} /> Download All as ZIP</>}
             </button>
           )}
         </>
@@ -235,10 +247,10 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
 
       {preview && (
         <div className="cc-glass-lightbox" onClick={() => setPreview(null)}>
-          <button className="cc-glass-lightbox-close" onClick={() => setPreview(null)}><X size={18} /></button>
+          <button className="cc-glass-lightbox-close" onClick={() => setPreview(null)}><GlassCloseIcon size={20} /></button>
           <div onClick={(event) => event.stopPropagation()}>
             {fileKind(preview.name) === "image" ? <img src={preview.url} alt={preview.name} /> : <video src={preview.url} controls autoPlay />}
-            <div className="cc-glass-lightbox-meta"><span>{preview.name}</span><a href={preview.url} download={preview.name}><Download size={12} /> Download</a></div>
+            <div className="cc-glass-lightbox-meta"><span>{preview.name}</span><a href={preview.url} download={preview.name}><GlassRetrieveIcon size={15} /> Download</a></div>
           </div>
         </div>
       )}
